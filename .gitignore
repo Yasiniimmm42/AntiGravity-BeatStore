@@ -44,3 +44,8 @@ next-env.d.ts
 
 # Database
 prisma/*.db
+/dev.db
+
+# Private, web-inaccessible uploaded files (preview audio)
+/private/previews/*
+!/private/previews/.gitkeep

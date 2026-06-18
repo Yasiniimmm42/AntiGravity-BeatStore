@@ -7,16 +7,58 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum LicenseType {
+  BASIC
+  PREMIUM
+  UNLIMITED
+}
+
 model Beat {
-  id               Int      @id @default(autoincrement())
-  slug             String   @unique
-  title            String
-  genre            String
-  bpm              Int
-  price            Float
-  taggedAudioUrl   String?
-  untaggedAudioUrl String
-  coverUrl         String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id             Int         @id @default(autoincrement())
+  slug           String      @unique
+  title          String
+  genre          String
+  bpm            Int
+  taggedAudioUrl String?
+  coverUrl       String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  licenses       License[]
+  orderItems     OrderItem[]
+}
+
+model License {
+  id        Int         @id @default(autoincrement())
+  beatId    Int
+  beat      Beat        @relation(fields: [beatId], references: [id], onDelete: Cascade)
+  type      LicenseType
+  price     Float
+  fileUrl   String
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@unique([beatId, type])
+}
+
+model Order {
+  id            Int         @id @default(autoincrement())
+  orderNumber   String      @unique
+  customerEmail String
+  customerName  String?
+  total         Float
+  status        String      @default("paid")
+  items         OrderItem[]
+  createdAt     DateTime    @default(now())
+}
+
+model OrderItem {
+  id          Int         @id @default(autoincrement())
+  orderId     Int
+  order       Order       @relation(fields: [orderId], references: [id])
+  beatId      Int
+  beat        Beat        @relation(fields: [beatId], references: [id])
+  licenseType LicenseType
+  title       String
+  price       Float
+  downloadUrl String
 }

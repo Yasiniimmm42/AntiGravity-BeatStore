@@ -1,12 +1,15 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { BeatCard } from "@/components/BeatCard";
 
 // Next.js App Router (Server Component)
 export default async function BeatDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  // fileUrl sunucu bileşeninden istemciye (RSC payload) gönderilmiyor:
+  // satın alınmamış dosyaların indirme linkini tarayıcıya sızdırmamak için
+  // sadece tür/fiyat seçiliyor.
   const beat = await prisma.beat.findUnique({
     where: { slug },
+    include: { licenses: { select: { id: true, type: true, price: true } } },
   });
 
   if (!beat) {
@@ -14,7 +17,7 @@ export default async function BeatDetailPage({ params }: { params: Promise<{ slu
   }
 
   return (
-    <main className="container" style={{ padding: '60px 20px', paddingBottom: '120px' }}>
+    <main className="container" style={{ paddingTop: '60px', paddingLeft: '20px', paddingRight: '20px', paddingBottom: '120px' }}>
       <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', gap: '40px' }}>
         
         {/* Sol Taraf: Görsel */}
@@ -40,28 +43,14 @@ export default async function BeatDetailPage({ params }: { params: Promise<{ slu
           </div>
           
           <div className="glass-panel" style={{ padding: '30px', border: '1px solid var(--border)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '25px' }}>
-              <span style={{ fontSize: '16px', color: 'var(--muted)' }}>Standart Lisans (Untagged)</span>
-              <span style={{ fontSize: '32px', fontWeight: 700, color: 'var(--foreground)' }}>₺{beat.price.toFixed(2)}</span>
-            </div>
-
-            {/* Client bileşenine çevirdiğimiz BeatCard'ı burada sadece fonksiyonellik için kullanmıyoruz. 
-                Satın alma işlemi client side olduğu için ayrı bir client component butonu koymak daha iyi olur,
-                ancak şimdilik sadece bu sayfanın genel yapısını gösterelim. 
-                Sepete Ekle butonu için Client component sarmalayıcıya ihtiyacımız var. 
-                Onun yerine ufak bir client component yazalım.
-            */}
-            <ClientActions beat={beat as any} />
-            
+            <ClientActions beat={{ ...beat, coverUrl: beat.coverUrl ?? undefined }} />
           </div>
-          
+
           <div style={{ marginTop: '30px', padding: '20px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px' }}>
-            <h3 style={{ fontSize: '16px', marginBottom: '10px', fontWeight: 600 }}>Lisans Detayları</h3>
-            <ul style={{ color: 'var(--muted)', fontSize: '14px', lineHeight: 1.8, paddingLeft: '20px' }}>
-              <li>Untagged WAV / MP3 Dosyası</li>
-              <li>Tüm dijital platformlarda yayınlama hakkı</li>
-              <li>Müzik klibi ve performans hakkı</li>
-            </ul>
+            <h3 style={{ fontSize: '16px', marginBottom: '10px', fontWeight: 600 }}>Lisans Sözleşmeleri</h3>
+            <p style={{ color: 'var(--muted)', fontSize: '14px', lineHeight: 1.8 }}>
+              Her lisansın tam hukuki metni (TR/ENG), satın alma sonrası sipariş onay sayfasında indirilebilir hale gelir.
+            </p>
           </div>
         </div>
       </div>

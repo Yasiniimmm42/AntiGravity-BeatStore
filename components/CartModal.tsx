@@ -1,8 +1,10 @@
 "use client";
 
-import { useCart } from "./CartProvider";
+import { useCart, cartKey } from "./CartProvider";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Trash2, ShoppingBag } from "lucide-react";
+import Link from "next/link";
+import { LICENSE_INFO } from "@/lib/licenses";
 
 export function CartModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const { items, removeFromCart, total } = useCart();
@@ -58,12 +60,12 @@ export function CartModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
                 </div>
               ) : (
                 items.map(item => (
-                  <motion.div 
+                  <motion.div
                     layout
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, x: -20 }}
-                    key={item.id} 
+                    key={cartKey(item.beatId, item.licenseType)}
                     style={{ display: 'flex', gap: '16px', padding: '16px', background: 'var(--surface)', borderRadius: '12px', border: '1px solid var(--border)' }}
                   >
                     {item.coverUrl ? (
@@ -71,15 +73,15 @@ export function CartModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
                     ) : (
                       <div style={{ width: '60px', height: '60px', borderRadius: '8px', background: 'var(--surface-hover)' }} />
                     )}
-                    
+
                     <div style={{ flex: 1 }}>
                       <h4 style={{ margin: '0 0 4px 0', fontSize: '15px' }}>{item.title}</h4>
-                      <p style={{ margin: 0, color: 'var(--muted)', fontSize: '13px' }}>Untagged Lisans</p>
+                      <p style={{ margin: 0, color: 'var(--muted)', fontSize: '13px' }}>{LICENSE_INFO[item.licenseType].label} Lisans</p>
                       <div style={{ marginTop: '8px', fontWeight: 600 }}>₺{item.price.toFixed(2)}</div>
                     </div>
 
-                    <button 
-                      onClick={() => removeFromCart(item.id)}
+                    <button
+                      onClick={() => removeFromCart(cartKey(item.beatId, item.licenseType))}
                       style={{ background: 'transparent', border: 'none', color: 'var(--muted)', cursor: 'pointer', padding: '8px', alignSelf: 'flex-start' }}
                     >
                       <Trash2 size={18} />
@@ -94,14 +96,14 @@ export function CartModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
                 <span>Toplam:</span>
                 <span>₺{total.toFixed(2)}</span>
               </div>
-              <button 
-                className="btn-primary" 
-                style={{ width: '100%', padding: '16px', fontSize: '16px' }}
-                disabled={items.length === 0}
-                onClick={() => alert("Ödeme altyapısı yakında aktif olacak.")}
+              <Link
+                href="/checkout"
+                onClick={items.length === 0 ? (e) => e.preventDefault() : onClose}
+                className="btn-primary"
+                style={{ width: '100%', padding: '16px', fontSize: '16px', display: 'block', textAlign: 'center', opacity: items.length === 0 ? 0.5 : 1, pointerEvents: items.length === 0 ? 'none' : 'auto' }}
               >
                 Ödemeye Geç
-              </button>
+              </Link>
             </div>
           </motion.div>
         </>

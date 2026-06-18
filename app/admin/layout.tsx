@@ -1,17 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { LayoutDashboard, UploadCloud, Settings, Music } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { LayoutDashboard, UploadCloud, Settings, Music, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  if (pathname === "/admin/login") {
+    return <>{children}</>;
+  }
 
   const links = [
     { href: "/admin", label: "Katalog", icon: <LayoutDashboard size={18} /> },
     { href: "/admin/upload", label: "Yeni Yükle", icon: <UploadCloud size={18} /> },
   ];
+
+  const handleLogout = async () => {
+    await fetch("/api/admin/logout", { method: "POST" });
+    router.push("/admin/login");
+    router.refresh();
+  };
 
   return (
     <div style={{ display: 'flex', minHeight: 'calc(100vh - 80px)', backgroundColor: 'var(--background)' }}>
@@ -67,9 +78,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           })}
         </nav>
 
-        <div style={{ marginTop: 'auto', paddingTop: '20px', borderTop: '1px solid var(--border)', paddingLeft: '10px', display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--muted)' }}>
-          <Settings size={18} />
-          <span style={{ fontSize: '14px', fontWeight: 500 }}>Ayarlar</span>
+        <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ paddingTop: '20px', borderTop: '1px solid var(--border)', paddingLeft: '10px', display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--muted)' }}>
+            <Settings size={18} />
+            <span style={{ fontSize: '14px', fontWeight: 500 }}>Ayarlar</span>
+          </div>
+          <motion.button
+            whileHover={{ x: 4 }}
+            onClick={handleLogout}
+            style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 15px', background: 'transparent', border: 'none', color: 'var(--danger)', fontWeight: 500, fontSize: '14px', cursor: 'pointer', textAlign: 'left' }}
+          >
+            <LogOut size={18} />
+            Çıkış Yap
+          </motion.button>
         </div>
       </aside>
 

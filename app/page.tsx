@@ -4,16 +4,22 @@ import { useEffect, useState } from "react";
 import { BeatCard } from "@/components/BeatCard";
 import { AudioPlayer } from "@/components/AudioPlayer";
 import { motion } from "framer-motion";
+import { getPreviewUrl } from "@/lib/preview";
+
+type License = {
+  type: "BASIC" | "PREMIUM" | "UNLIMITED";
+  price: number;
+};
 
 type Beat = {
   id: number;
+  slug: string;
   title: string;
   genre: string;
   bpm: number;
-  price: number;
   coverUrl?: string | null;
   taggedAudioUrl?: string | null;
-  untaggedAudioUrl: string;
+  licenses: License[];
 };
 
 export default function Home() {
@@ -37,7 +43,7 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="container" style={{ padding: '40px 20px', paddingBottom: '120px' }}>
+    <main className="container" style={{ paddingTop: '40px', paddingLeft: '20px', paddingRight: '20px', paddingBottom: '120px' }}>
       
       {/* Hero Section */}
       <motion.div 
@@ -50,7 +56,7 @@ export default function Home() {
           High Quality <span style={{ color: 'var(--muted)' }}>Instrumentals</span>
         </h1>
         <p style={{ fontSize: '18px', color: 'var(--muted)', maxWidth: '600px', margin: '0 auto', lineHeight: 1.6 }}>
-          Dünya standartlarında prodüksiyon kalitesiyle üretilmiş profesyonel beat'leri keşfet ve satın al.
+          Dünya standartlarında prodüksiyon kalitesiyle üretilmiş profesyonel beat&apos;leri keşfet ve satın al.
         </p>
       </motion.div>
 
@@ -85,8 +91,8 @@ export default function Home() {
 
       {/* Persistent Audio Player */}
       {currentBeat && (
-        <AudioPlayer 
-          src={currentBeat.taggedAudioUrl || currentBeat.untaggedAudioUrl} 
+        <AudioPlayer
+          src={getPreviewUrl(currentBeat.taggedAudioUrl)}
           title={currentBeat.title}
           cover={currentBeat.coverUrl || undefined}
         />
