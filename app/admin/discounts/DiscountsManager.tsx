@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Tag } from "lucide-react";
+import { Plus, Tag, CalendarDays } from "lucide-react";
 
 type Discount = {
   id: string;
@@ -251,7 +251,22 @@ export function DiscountsManager({ discounts }: { discounts: Discount[] }) {
                   <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', color: 'var(--muted)', fontWeight: 500 }}>
                     Son Kullanma Tarihi (opsiyonel)
                   </label>
-                  <input type="date" value={expiresAt} onChange={(e) => setExpiresAt(e.target.value)} />
+                  <div style={{ position: 'relative' }}>
+                    <CalendarDays
+                      size={16}
+                      color="var(--muted)"
+                      style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}
+                    />
+                    <input
+                      type="date"
+                      value={expiresAt}
+                      onChange={(e) => setExpiresAt(e.target.value)}
+                      style={{ paddingLeft: '40px' }}
+                    />
+                  </div>
+                  <p style={{ margin: '6px 0 0 0', fontSize: '12px', color: 'var(--muted)' }}>
+                    {expiresAt ? `Bu kupon ${new Date(expiresAt).toLocaleDateString("tr-TR")} sonrası kullanılamaz.` : "Boş bırakılırsa kupon süresiz olur."}
+                  </p>
                 </div>
 
                 <div style={{ display: 'flex', gap: '12px', marginTop: '10px' }}>
