@@ -2,7 +2,17 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, UploadCloud, Settings, Music, LogOut } from "lucide-react";
+import {
+  LayoutDashboard,
+  Package,
+  ShoppingCart,
+  Wallet,
+  Undo2,
+  Tag,
+  Settings,
+  Music,
+  LogOut,
+} from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -14,8 +24,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   const links = [
-    { href: "/admin", label: "Katalog", icon: <LayoutDashboard size={18} /> },
-    { href: "/admin/upload", label: "Yeni Yükle", icon: <UploadCloud size={18} /> },
+    { href: "/admin", label: "Hesap Özeti", icon: <LayoutDashboard size={18} /> },
+    { href: "/admin/products", label: "Ürünler", icon: <Package size={18} /> },
+    { href: "/admin/orders", label: "Siparişler", icon: <ShoppingCart size={18} /> },
+    { href: "/admin/payouts", label: "Tahsilatlar", icon: <Wallet size={18} /> },
+    { href: "/admin/returns", label: "İadeler", icon: <Undo2 size={18} /> },
+    { href: "/admin/discounts", label: "İndirimler", icon: <Tag size={18} /> },
+    { href: "/admin/settings", label: "Ayarlar", icon: <Settings size={18} /> },
   ];
 
   const handleLogout = async () => {
@@ -27,10 +42,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div style={{ display: 'flex', minHeight: 'calc(100vh - 80px)', backgroundColor: 'var(--background)' }}>
       {/* Sidebar */}
-      <aside style={{ 
-        width: '260px', 
-        backgroundColor: 'var(--surface)', 
-        borderRight: '1px solid var(--border)',
+      <aside style={{
+        width: '260px',
+        backgroundColor: '#18181b', /* zinc-900 */
+        borderRight: '1px solid #27272a', /* zinc-800 */
         padding: '30px 20px',
         display: 'flex',
         flexDirection: 'column',
@@ -58,7 +73,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     color: isActive ? 'var(--foreground)' : 'var(--muted)', 
                     fontWeight: 500, 
                     borderRadius: '8px', 
-                    background: isActive ? 'rgba(255,255,255,0.05)' : 'transparent',
+                    background: isActive ? '#27272a' : 'transparent',
                     transition: 'all 0.2s',
                     position: 'relative',
                     zIndex: 2
@@ -68,9 +83,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   {link.label}
                 </motion.div>
                 {isActive && (
-                  <motion.div 
+                  <motion.div
                     layoutId="active-nav"
-                    style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(255,255,255,0.05)', borderRadius: '8px', zIndex: 1 }}
+                    style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: '#27272a', borderRadius: '8px', zIndex: 1 }}
                   />
                 )}
               </Link>
@@ -78,11 +93,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           })}
         </nav>
 
-        <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div style={{ paddingTop: '20px', borderTop: '1px solid var(--border)', paddingLeft: '10px', display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--muted)' }}>
-            <Settings size={18} />
-            <span style={{ fontSize: '14px', fontWeight: 500 }}>Ayarlar</span>
-          </div>
+        <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '20px', borderTop: '1px solid #27272a' }}>
           <motion.button
             whileHover={{ x: 4 }}
             onClick={handleLogout}

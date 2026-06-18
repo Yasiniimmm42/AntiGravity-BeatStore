@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import 'tailwindcss';
 
 :root {
   --background: #09090b; /* Zinc 950 */
@@ -211,4 +212,26 @@ input[type="range"]:focus {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
+}
+
+/* Admin Panel — glassmorphism yerine düz zinc-900/zinc-800 yüzeyler,
+   sidebar ve kartlar arasında daha belirgin bir derinlik için. */
+.admin-card {
+  background-color: #18181b; /* zinc-900 */
+  border: 1px solid #27272a; /* zinc-800 */
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+}
+
+.admin-nav-link {
+  padding: 12px 15px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 500;
+  font-size: 14px;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+  position: relative;
+  z-index: 2;
 }
