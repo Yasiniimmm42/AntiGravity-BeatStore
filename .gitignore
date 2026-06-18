@@ -49,3 +49,7 @@ prisma/*.db
 # Private, web-inaccessible uploaded files (preview audio)
 /private/previews/*
 !/private/previews/.gitkeep
+
+# Private, web-inaccessible uploaded files (purchased license deliverables)
+/private/licenses/*
+!/private/licenses/.gitkeep

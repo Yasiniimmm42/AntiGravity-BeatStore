@@ -39,7 +39,7 @@ export default function AdminUploadPage() {
     setLicenses((prev) => ({ ...prev, [type]: { ...prev[type], file } }));
   };
 
-  const uploadFile = async (file: File, label: string, kind?: "preview") => {
+  const uploadFile = async (file: File, label: string, kind?: "preview" | "license") => {
     const formData = new FormData();
     formData.append("file", file);
     if (kind) formData.append("kind", kind);
@@ -73,7 +73,7 @@ export default function AdminUploadPage() {
       const licensePayload = await Promise.all(
         LICENSE_TIERS.map(async (tier) => {
           const lic = licenses[tier.type];
-          const fileUrl = await uploadFile(lic.file as File, tier.label);
+          const fileUrl = await uploadFile(lic.file as File, tier.label, "license");
           return { type: tier.type, price: parseFloat(lic.price), fileUrl };
         })
       );

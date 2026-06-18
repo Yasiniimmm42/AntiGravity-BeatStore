@@ -65,6 +65,7 @@ export async function POST(req: NextRequest) {
     const file = formData.get("file") as File;
     const kind = formData.get("kind") as string | null;
     const isPreview = kind === "preview";
+    const isLicenseFile = kind === "license";
 
     if (!file) {
       return NextResponse.json({ error: "No file received." }, { status: 400 });
@@ -141,6 +142,15 @@ export async function POST(req: NextRequest) {
       await writeFile(filepath, buffer);
       // Önizleme dosyaları public/ altında değil, sadece bare filename döner —
       // /api/preview/[filename] route'u bunu private/previews/ içinde arar.
+      return NextResponse.json({ url: filename });
+    }
+
+    if (isLicenseFile) {
+      const filepath = path.join(process.cwd(), "private", "licenses", filename);
+      await writeFile(filepath, buffer);
+      // Satın alınan lisans dosyaları (MP3/WAV/Stems) public/ altında değil —
+      // sadece bare filename döner, gerçek indirme /api/download/[orderNumber]/[itemId]
+      // üzerinden imzalı, süresi dolan bir token ile yapılır.
       return NextResponse.json({ url: filename });
     }
 

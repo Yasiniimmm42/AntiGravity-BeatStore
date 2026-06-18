@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { CheckCircle2, Download, FileText } from "lucide-react";
 import { LICENSE_INFO } from "@/lib/licenses";
+import { createDownloadToken } from "@/lib/downloadToken";
 
 export default async function OrderConfirmationPage({ params }: { params: Promise<{ orderNumber: string }> }) {
   const { orderNumber } = await params;
@@ -50,8 +51,7 @@ export default async function OrderConfirmationPage({ params }: { params: Promis
                   </div>
                   <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
                     <a
-                      href={item.downloadUrl}
-                      download
+                      href={`/api/download/${order.orderNumber}/${item.id}?token=${createDownloadToken(item.id)}`}
                       className="btn-primary"
                       style={{ padding: "10px 16px", fontSize: "14px", display: "flex", alignItems: "center", gap: "8px" }}
                     >
