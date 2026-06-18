@@ -1,13 +1,30 @@
 "use client";
 
+import { useState } from "react";
 import { useCart, cartKey } from "./CartProvider";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Trash2, ShoppingBag } from "lucide-react";
+import { X, Trash2, ShoppingBag, Tag } from "lucide-react";
 import Link from "next/link";
 import { LICENSE_INFO } from "@/lib/licenses";
 
 export function CartModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
-  const { items, removeFromCart, total } = useCart();
+  const { items, removeFromCart, total, discount, discountedTotal, applyDiscount, removeDiscount } = useCart();
+  const [code, setCode] = useState("");
+  const [applying, setApplying] = useState(false);
+  const [couponError, setCouponError] = useState("");
+
+  const handleApplyCoupon = async () => {
+    if (!code.trim()) return;
+    setApplying(true);
+    setCouponError("");
+    const result = await applyDiscount(code);
+    if (!result.success) {
+      setCouponError(result.error || "Kupon geçersiz.");
+    } else {
+      setCode("");
+    }
+    setApplying(false);
+  };
 
   return (
     <AnimatePresence>
@@ -92,9 +109,61 @@ export function CartModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
             </div>
 
             <div style={{ padding: '24px', borderTop: '1px solid var(--border)', background: 'var(--surface)' }}>
+              <div style={{ marginBottom: '16px' }}>
+                {discount ? (
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '10px 12px',
+                      background: 'rgba(16, 185, 129, 0.1)',
+                      border: '1px solid rgba(16, 185, 129, 0.2)',
+                      borderRadius: '8px',
+                      fontSize: '13px',
+                    }}
+                  >
+                    <span style={{ color: '#10b981', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Tag size={14} /> {discount.code} (%{discount.percent} indirim)
+                    </span>
+                    <button
+                      onClick={removeDiscount}
+                      style={{ background: 'transparent', border: 'none', color: 'var(--muted)', cursor: 'pointer', padding: '2px' }}
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <input
+                      type="text"
+                      placeholder="Kupon kodu"
+                      value={code}
+                      onChange={(e) => setCode(e.target.value)}
+                      style={{ flex: 1, textTransform: 'uppercase' }}
+                    />
+                    <button
+                      onClick={handleApplyCoupon}
+                      disabled={applying}
+                      className="btn-outline"
+                      style={{ padding: '0 16px', fontSize: '13px', whiteSpace: 'nowrap' }}
+                    >
+                      {applying ? "..." : "Uygula"}
+                    </button>
+                  </div>
+                )}
+                {couponError && <p style={{ color: '#ef4444', fontSize: '12px', marginTop: '6px' }}>{couponError}</p>}
+              </div>
+
+              {discount && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: 'var(--muted)', marginBottom: '4px' }}>
+                  <span>Ara Toplam</span>
+                  <span style={{ textDecoration: 'line-through' }}>₺{total.toFixed(2)}</span>
+                </div>
+              )}
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', fontSize: '18px', fontWeight: 600 }}>
                 <span>Toplam:</span>
-                <span>₺{total.toFixed(2)}</span>
+                <span>₺{discountedTotal.toFixed(2)}</span>
               </div>
               <Link
                 href="/checkout"

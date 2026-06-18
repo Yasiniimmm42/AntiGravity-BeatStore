@@ -79,7 +79,31 @@ export default async function OrderConfirmationPage({ params }: { params: Promis
             })}
           </div>
 
-          <div style={{ display: "flex", justifyContent: "space-between", marginTop: "24px", paddingTop: "20px", borderTop: "1px solid var(--border)", fontSize: "18px", fontWeight: 700 }}>
+          {order.discountCode && (
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: "24px", paddingTop: "20px", borderTop: "1px solid var(--border)", fontSize: "13px", color: "var(--muted)" }}>
+              <span>Ara Toplam</span>
+              <span style={{ textDecoration: "line-through" }}>
+                ₺{order.items.reduce((sum, item) => sum + item.price, 0).toFixed(2)}
+              </span>
+            </div>
+          )}
+          {order.discountCode && (
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: "6px", fontSize: "13px", color: "#10b981" }}>
+              <span>Kupon ({order.discountCode})</span>
+              <span>Uygulandı</span>
+            </div>
+          )}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              marginTop: order.discountCode ? "10px" : "24px",
+              paddingTop: order.discountCode ? "0" : "20px",
+              borderTop: order.discountCode ? "none" : "1px solid var(--border)",
+              fontSize: "18px",
+              fontWeight: 700,
+            }}
+          >
             <span>Toplam</span>
             <span>₺{order.total.toFixed(2)}</span>
           </div>

@@ -47,6 +47,7 @@ model Order {
   customerName  String?
   total         Float
   status        String      @default("paid")
+  discountCode  String?
   items         OrderItem[]
   createdAt     DateTime    @default(now())
 }
@@ -80,4 +81,16 @@ model RateLimit {
   key     String   @unique
   count   Int      @default(0)
   resetAt DateTime
+}
+
+// Yüzdesel indirim kuponları.
+model Discount {
+  id              String    @id @default(uuid())
+  code            String    @unique
+  discountPercent Int
+  isActive        Boolean   @default(true)
+  uses            Int       @default(0)
+  maxUses         Int?
+  expiresAt       DateTime?
+  createdAt       DateTime  @default(now())
 }

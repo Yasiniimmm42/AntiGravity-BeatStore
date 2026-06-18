@@ -9,7 +9,7 @@ import Link from "next/link";
 import { LICENSE_INFO } from "@/lib/licenses";
 
 export default function CheckoutPage() {
-  const { items, total, clearCart } = useCart();
+  const { items, total, discount, discountedTotal, clearCart } = useCart();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -25,7 +25,12 @@ export default function CheckoutPage() {
       const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, name, items: items.map((i) => ({ beatId: i.beatId, licenseType: i.licenseType })) }),
+        body: JSON.stringify({
+          email,
+          name,
+          items: items.map((i) => ({ beatId: i.beatId, licenseType: i.licenseType })),
+          discountCode: discount?.code,
+        }),
       });
 
       const data = await res.json();
@@ -66,9 +71,21 @@ export default function CheckoutPage() {
               <span>₺{item.price.toFixed(2)}</span>
             </div>
           ))}
+          {discount && (
+            <>
+              <div style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", fontSize: "13px", color: "var(--muted)" }}>
+                <span>Ara Toplam</span>
+                <span style={{ textDecoration: "line-through" }}>₺{total.toFixed(2)}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", padding: "0 0 10px 0", fontSize: "13px", color: "#10b981" }}>
+                <span>Kupon ({discount.code})</span>
+                <span>-%{discount.percent}</span>
+              </div>
+            </>
+          )}
           <div style={{ display: "flex", justifyContent: "space-between", paddingTop: "16px", fontWeight: 700, fontSize: "18px" }}>
             <span>Toplam</span>
-            <span>₺{total.toFixed(2)}</span>
+            <span>₺{discountedTotal.toFixed(2)}</span>
           </div>
         </div>
 
@@ -94,7 +111,7 @@ export default function CheckoutPage() {
 
           <button type="submit" className="btn-primary" disabled={loading} style={{ padding: "16px", fontSize: "16px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
             <CreditCard size={18} />
-            {loading ? "İşleniyor..." : `₺${total.toFixed(2)} Öde (Demo)`}
+            {loading ? "İşleniyor..." : `₺${discountedTotal.toFixed(2)} Öde (Demo)`}
           </button>
         </motion.form>
       </div>
