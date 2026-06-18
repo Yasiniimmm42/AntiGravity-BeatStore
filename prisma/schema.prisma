@@ -1,0 +1,22 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Beat {
+  id               Int      @id @default(autoincrement())
+  slug             String   @unique
+  title            String
+  genre            String
+  bpm              Int
+  price            Float
+  taggedAudioUrl   String?
+  untaggedAudioUrl String
+  coverUrl         String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
