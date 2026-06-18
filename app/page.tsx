@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { BeatCard } from "@/components/BeatCard";
-import { AudioPlayer } from "@/components/AudioPlayer";
+import { useAudioPlayer } from "@/components/AudioPlayerProvider";
 import { motion } from "framer-motion";
 import { getPreviewFilename } from "@/lib/preview";
 
@@ -24,8 +24,8 @@ type Beat = {
 
 export default function Home() {
   const [beats, setBeats] = useState<Beat[]>([]);
-  const [currentBeat, setCurrentBeat] = useState<Beat | null>(null);
   const [loading, setLoading] = useState(true);
+  const { playTrack } = useAudioPlayer();
 
   useEffect(() => {
     async function fetchBeats() {
@@ -79,24 +79,18 @@ export default function Home() {
             gap: '24px' 
           }}>
             {beats.map((beat) => (
-              <BeatCard 
-                key={beat.id} 
-                beat={beat} 
-                onPlay={(b) => setCurrentBeat(b)} 
+              <BeatCard
+                key={beat.id}
+                beat={beat}
+                onPlay={(b) => {
+                  const filename = getPreviewFilename(b.taggedAudioUrl);
+                  if (filename) playTrack(filename, b.title, b.coverUrl || undefined);
+                }}
               />
             ))}
           </div>
         )}
       </div>
-
-      {/* Persistent Audio Player */}
-      {currentBeat && (
-        <AudioPlayer
-          filename={getPreviewFilename(currentBeat.taggedAudioUrl)}
-          title={currentBeat.title}
-          cover={currentBeat.coverUrl || undefined}
-        />
-      )}
     </main>
   );
 }

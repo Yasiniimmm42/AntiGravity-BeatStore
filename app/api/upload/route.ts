@@ -49,6 +49,11 @@ const MAX_FILE_SIZE_IMAGE = 10 * 1024 * 1024; // 10MB
 const MAX_FILE_SIZE_MP3 = 30 * 1024 * 1024; // 30MB
 const MAX_FILE_SIZE_WAV = 150 * 1024 * 1024; // 150MB
 const MAX_FILE_SIZE_ARCHIVE = 500 * 1024 * 1024; // 500MB (stems/trackout paketleri)
+// Önizleme sesi istemci tarafında fetch+blob ile tamamen RAM'e indirilip
+// oynatıldığı için (bkz. components/AudioPlayer.tsx), büyük dosyalar hem
+// tarayıcı belleğini hem sunucu bandwidth'ini şişirir. 128kbps MP3'te ~3
+// dakikalık bir önizleme bu sınırın içinde kalır.
+const MAX_FILE_SIZE_PREVIEW = 3 * 1024 * 1024; // 3MB
 
 export async function POST(req: NextRequest) {
   if (!isAuthorizedRequest(req)) {
@@ -97,7 +102,10 @@ export async function POST(req: NextRequest) {
 
     let maxSize: number;
     let maxLabel: string;
-    if (isArchive) {
+    if (isPreview) {
+      maxSize = MAX_FILE_SIZE_PREVIEW;
+      maxLabel = "3MB";
+    } else if (isArchive) {
       maxSize = MAX_FILE_SIZE_ARCHIVE;
       maxLabel = "500MB";
     } else if (isWav) {
@@ -112,6 +120,15 @@ export async function POST(req: NextRequest) {
     }
 
     if (file.size > maxSize) {
+      const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+      if (isPreview) {
+        return NextResponse.json(
+          {
+            error: `Önizleme sesi dosyası çok büyük (${sizeMb}MB, maks. 3MB). Lütfen dosyayı 128kbps MP3 olarak sıkıştırıp tekrar yükleyin: "${file.name}".`,
+          },
+          { status: 400 }
+        );
+      }
       return NextResponse.json({ error: `Dosya boyutu çok büyük (maks. ${maxLabel}).` }, { status: 400 });
     }
 

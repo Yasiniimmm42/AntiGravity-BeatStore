@@ -4,7 +4,7 @@ import { useCart, cartKey } from "@/components/CartProvider";
 import type { LicenseType } from "@/components/CartProvider";
 import { ShoppingCart, Check, Play } from "lucide-react";
 import { motion } from "framer-motion";
-import { AudioPlayer } from "@/components/AudioPlayer";
+import { useAudioPlayer } from "@/components/AudioPlayerProvider";
 import { useState } from "react";
 import { LICENSE_INFO, LICENSE_ORDER } from "@/lib/licenses";
 import { getPreviewFilename } from "@/lib/preview";
@@ -25,7 +25,7 @@ type Beat = {
 
 export function ClientActions({ beat }: { beat: Beat }) {
   const { addToCart, items } = useCart();
-  const [isPlaying, setIsPlaying] = useState(false);
+  const { playTrack } = useAudioPlayer();
   const [selected, setSelected] = useState<LicenseType>("BASIC");
 
   const sortedLicenses = [...beat.licenses].sort(
@@ -85,7 +85,7 @@ export function ClientActions({ beat }: { beat: Beat }) {
         <motion.button
           whileHover={previewFilename ? { scale: 1.02 } : {}}
           whileTap={previewFilename ? { scale: 0.98 } : {}}
-          onClick={() => previewFilename && setIsPlaying(true)}
+          onClick={() => previewFilename && playTrack(previewFilename, beat.title, beat.coverUrl || undefined)}
           disabled={!previewFilename}
           className="btn-outline"
           style={{ flex: 1, padding: '16px', fontSize: '16px', opacity: previewFilename ? 1 : 0.5, cursor: previewFilename ? 'pointer' : 'not-allowed' }}
@@ -103,14 +103,6 @@ export function ClientActions({ beat }: { beat: Beat }) {
           {inCart ? <><Check size={20} /> Sepete Eklendi</> : <><ShoppingCart size={20} /> Sepete Ekle</>}
         </motion.button>
       </div>
-
-      {isPlaying && previewFilename && (
-        <AudioPlayer
-          filename={previewFilename}
-          title={beat.title}
-          cover={beat.coverUrl || undefined}
-        />
-      )}
     </>
   );
 }

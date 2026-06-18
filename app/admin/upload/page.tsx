@@ -159,7 +159,7 @@ export default function AdminUploadPage() {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--muted)', fontWeight: 500 }}>
-            <FileAudio size={14} /> Tagged Ses Dosyası (Sitede dinletmek için önizleme, opsiyonel)
+            <FileAudio size={14} /> Tagged Ses Dosyası (Sitede dinletmek için önizleme, opsiyonel — maks. 3MB, 128kbps MP3 önerilir)
           </label>
           <input type="file" accept="audio/*" onChange={e => setTaggedAudio(e.target.files?.[0] || null)} />
         </div>

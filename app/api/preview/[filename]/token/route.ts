@@ -18,6 +18,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ file
     return NextResponse.json({ error: "Önizleme bulunamadı." }, { status: 404 });
   }
 
-  const token = createPreviewToken(filename);
+  const token = await createPreviewToken(filename);
   return NextResponse.json({ token }, { headers: { "Cache-Control": "no-store" } });
 }

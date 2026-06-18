@@ -62,3 +62,22 @@ model OrderItem {
   price       Float
   downloadUrl String
 }
+
+// Önizleme akışı için kısa ömürlü, tek kullanımlık erişim token'ı.
+// Çoklu instance/yatay ölçeklenebilirlik için RAM yerine veritabanında saklanır.
+model PreviewToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  filename  String
+  isUsed    Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+// /api/admin/login brute-force koruması için IP başına deneme sayacı.
+model RateLimit {
+  id      Int      @id @default(autoincrement())
+  key     String   @unique
+  count   Int      @default(0)
+  resetAt DateTime
+}

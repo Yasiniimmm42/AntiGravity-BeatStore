@@ -20,7 +20,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ file
   // Kısa ömürlü, imzalı, tek kullanımlık token zorunlu: /api/preview/[filename]/token
   // route'undan alınmadan veya tekrar kullanılmaya çalışılırsa erişim reddedilir.
   const token = req.nextUrl.searchParams.get("token");
-  if (!token || !verifyAndConsumePreviewToken(filename, token)) {
+  if (!token || !(await verifyAndConsumePreviewToken(filename, token))) {
     return NextResponse.json({ error: "Geçersiz veya süresi dolmuş erişim token'ı." }, { status: 403 });
   }
 
