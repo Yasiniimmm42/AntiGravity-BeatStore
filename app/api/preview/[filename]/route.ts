@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { stat, readFile } from "fs/promises";
 import path from "path";
 import { prisma } from "@/lib/prisma";
+import { verifyAndConsumePreviewToken } from "@/lib/previewToken";
 
 const CONTENT_TYPES: Record<string, string> = {
   ".mp3": "audio/mpeg",
@@ -14,6 +15,13 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ file
   // Path traversal koruması: yalnızca düz dosya adına izin ver.
   if (!filename || filename.includes("/") || filename.includes("\\") || filename.includes("..")) {
     return NextResponse.json({ error: "Geçersiz dosya." }, { status: 400 });
+  }
+
+  // Kısa ömürlü, imzalı, tek kullanımlık token zorunlu: /api/preview/[filename]/token
+  // route'undan alınmadan veya tekrar kullanılmaya çalışılırsa erişim reddedilir.
+  const token = req.nextUrl.searchParams.get("token");
+  if (!token || !verifyAndConsumePreviewToken(filename, token)) {
+    return NextResponse.json({ error: "Geçersiz veya süresi dolmuş erişim token'ı." }, { status: 403 });
   }
 
   // Beat.taggedAudioUrl yeni kayıtlarda bare filename, eski kayıtlarda /uploads/<filename> olarak tutulur.

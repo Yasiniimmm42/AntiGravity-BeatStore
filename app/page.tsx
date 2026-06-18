@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { BeatCard } from "@/components/BeatCard";
 import { AudioPlayer } from "@/components/AudioPlayer";
 import { motion } from "framer-motion";
-import { getPreviewUrl } from "@/lib/preview";
+import { getPreviewFilename } from "@/lib/preview";
 
 type License = {
   type: "BASIC" | "PREMIUM" | "UNLIMITED";
@@ -92,7 +92,7 @@ export default function Home() {
       {/* Persistent Audio Player */}
       {currentBeat && (
         <AudioPlayer
-          src={getPreviewUrl(currentBeat.taggedAudioUrl)}
+          filename={getPreviewFilename(currentBeat.taggedAudioUrl)}
           title={currentBeat.title}
           cover={currentBeat.coverUrl || undefined}
         />

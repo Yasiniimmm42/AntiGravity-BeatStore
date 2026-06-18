@@ -4,20 +4,71 @@ import { useEffect, useRef, useState } from "react";
 import { Play, Pause, Volume2, VolumeX, Music } from "lucide-react";
 import { motion } from "framer-motion";
 
-export function AudioPlayer({ src, title, cover }: { src: string | null; title: string; cover?: string }) {
+export function AudioPlayer({ filename, title, cover }: { filename: string | null; title: string; cover?: string }) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1); // 0 to 1
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const blobUrlRef = useRef<string | null>(null);
+
+  // İndirme yöneticilerinin (IDM vb.) yakalayabileceği doğrudan bir medya
+  // URL'i hiç ortaya çıkmasın diye: önce kısa ömürlü/tek kullanımlık bir
+  // token alınır, sonra ses verisi fetch ile blob olarak çekilip
+  // URL.createObjectURL ile yerel bir blob: URL'e dönüştürülür.
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadAudio() {
+      if (!filename) return;
+      setBlobUrl(null);
+      setLoading(true);
+      try {
+        const tokenRes = await fetch(`/api/preview/${filename}/token`, { credentials: "include" });
+        if (!tokenRes.ok) throw new Error("Token alınamadı.");
+        const { token } = await tokenRes.json();
+
+        const audioRes = await fetch(`/api/preview/${filename}?token=${encodeURIComponent(token)}`, {
+          credentials: "include",
+        });
+        if (!audioRes.ok) throw new Error("Ses verisi alınamadı.");
+        const blob = await audioRes.blob();
+        if (cancelled) return;
+
+        if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
+        const url = URL.createObjectURL(blob);
+        blobUrlRef.current = url;
+        setBlobUrl(url);
+      } catch (err) {
+        console.error("Önizleme yüklenemedi", err);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    loadAudio();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [filename]);
+
+  // Component unmount olduğunda son blob URL'i de temizle (memory leak önleme).
+  useEffect(() => {
+    return () => {
+      if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
+    };
+  }, []);
 
   useEffect(() => {
-    if (audioRef.current && src) {
+    if (audioRef.current && blobUrl) {
       audioRef.current.volume = volume;
       audioRef.current.play().catch(err => console.error("Auto-play prevented", err));
       setIsPlaying(true);
     }
-  }, [src]);
+  }, [blobUrl]);
 
   const togglePlay = () => {
     if (!audioRef.current) return;
@@ -64,7 +115,7 @@ export function AudioPlayer({ src, title, cover }: { src: string | null; title: 
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   };
 
-  if (!src) return null;
+  if (!filename) return null;
 
   return (
     <motion.div 
@@ -98,7 +149,7 @@ export function AudioPlayer({ src, title, cover }: { src: string | null; title: 
           )}
           <div>
             <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }}>{title}</h4>
-            <p style={{ margin: 0, fontSize: '12px', color: 'var(--muted)' }}>Önizleme Çalıyor...</p>
+            <p style={{ margin: 0, fontSize: '12px', color: 'var(--muted)' }}>{loading ? "Yükleniyor..." : "Önizleme Çalıyor..."}</p>
           </div>
         </div>
         
@@ -146,10 +197,10 @@ export function AudioPlayer({ src, title, cover }: { src: string | null; title: 
       </div>
 
       {/* Gizli Audio Etiketi */}
-      <audio 
-        ref={audioRef} 
-        src={src} 
-        onEnded={() => setIsPlaying(false)} 
+      <audio
+        ref={audioRef}
+        src={blobUrl ?? undefined}
+        onEnded={() => setIsPlaying(false)}
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
       />

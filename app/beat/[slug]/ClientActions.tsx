@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import { AudioPlayer } from "@/components/AudioPlayer";
 import { useState } from "react";
 import { LICENSE_INFO, LICENSE_ORDER } from "@/lib/licenses";
-import { getPreviewUrl } from "@/lib/preview";
+import { getPreviewFilename } from "@/lib/preview";
 
 type License = {
   type: LicenseType;
@@ -33,7 +33,7 @@ export function ClientActions({ beat }: { beat: Beat }) {
   );
   const selectedLicense = sortedLicenses.find((l) => l.type === selected) ?? sortedLicenses[0];
   const inCart = items.some((i) => cartKey(i.beatId, i.licenseType) === cartKey(beat.id, selected));
-  const previewUrl = getPreviewUrl(beat.taggedAudioUrl);
+  const previewFilename = getPreviewFilename(beat.taggedAudioUrl);
 
   const handleAddToCart = () => {
     if (inCart || !selectedLicense) return;
@@ -83,14 +83,14 @@ export function ClientActions({ beat }: { beat: Beat }) {
 
       <div style={{ display: 'flex', gap: '15px' }}>
         <motion.button
-          whileHover={previewUrl ? { scale: 1.02 } : {}}
-          whileTap={previewUrl ? { scale: 0.98 } : {}}
-          onClick={() => previewUrl && setIsPlaying(true)}
-          disabled={!previewUrl}
+          whileHover={previewFilename ? { scale: 1.02 } : {}}
+          whileTap={previewFilename ? { scale: 0.98 } : {}}
+          onClick={() => previewFilename && setIsPlaying(true)}
+          disabled={!previewFilename}
           className="btn-outline"
-          style={{ flex: 1, padding: '16px', fontSize: '16px', opacity: previewUrl ? 1 : 0.5, cursor: previewUrl ? 'pointer' : 'not-allowed' }}
+          style={{ flex: 1, padding: '16px', fontSize: '16px', opacity: previewFilename ? 1 : 0.5, cursor: previewFilename ? 'pointer' : 'not-allowed' }}
         >
-          <Play size={20} /> {previewUrl ? "Dinle" : "Önizleme Yok"}
+          <Play size={20} /> {previewFilename ? "Dinle" : "Önizleme Yok"}
         </motion.button>
         <motion.button
           whileHover={!inCart ? { scale: 1.02 } : {}}
@@ -104,9 +104,9 @@ export function ClientActions({ beat }: { beat: Beat }) {
         </motion.button>
       </div>
 
-      {isPlaying && previewUrl && (
+      {isPlaying && previewFilename && (
         <AudioPlayer
-          src={previewUrl}
+          filename={previewFilename}
           title={beat.title}
           cover={beat.coverUrl || undefined}
         />
